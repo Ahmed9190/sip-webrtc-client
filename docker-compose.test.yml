@@ -1,0 +1,73 @@
+services:
+  # Test Home Assistant instance
+  homeassistant-test:
+    image: homeassistant/home-assistant:latest
+    container_name: ha-sip-test
+    volumes:
+      - ./tests/fixtures/ha-config:/config
+      - ./tests/fixtures/addons:/addons
+    ports:
+      - "8124:8123"
+    environment:
+      - TZ=UTC
+    networks:
+      - sip-test-network
+
+  # Test SIP server (Asterisk)
+  asterisk-test:
+    image: andrius/asterisk:latest
+    container_name: asterisk-sip-test
+    ports:
+      - "5060:5060"
+      - "8089:8088"
+      - "10000-20000:10000-20000/udp"
+    volumes:
+      - ./tests/fixtures/asterisk:/etc/asterisk
+    networks:
+      - sip-test-network
+
+  # SIP WebRTC Add-on under test
+  sip-webrtc-addon:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sip-webrtc-test
+    volumes:
+      - ./tests/fixtures/addon-config:/data
+    environment:
+      - SIP_SERVER=asterisk-test
+      - SIP_USERNAME=testuser
+      - SIP_PASSWORD=TestPass123
+      - WEBSOCKET_PORT=8088
+      - VIDEO_ENABLED=true
+      - AUDIO_ENABLED=true
+    ports:
+      - "8088:8088"
+    depends_on:
+      - asterisk-test
+    networks:
+      - sip-test-network
+
+  # Test runner
+  test-runner:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    container_name: sip-test-runner
+    volumes:
+      - .:/workspace
+      - /var/run/docker.sock:/var/run/docker.sock
+    working_dir: /workspace
+    environment:
+      - NODE_ENV=test
+      - CI=true
+    depends_on:
+      - homeassistant-test
+      - sip-webrtc-addon
+    networks:
+      - sip-test-network
+    command: npm test
+
+networks:
+  sip-test-network:
+    driver: bridge

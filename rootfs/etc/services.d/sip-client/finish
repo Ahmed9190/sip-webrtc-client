@@ -1,0 +1,9 @@
+#!/usr/bin/with-contenv bashio
+
+bashio::log.info "SIP WebRTC Client service stopped"
+
+# Clean up any remaining processes
+pkill -f "node.*sip"
+
+exit 0
+

@@ -1,0 +1,78 @@
+name: "SIP WebRTC Video Client"
+description: "Professional WebRTC-enabled SIP client for video calling through Home Assistant dashboard with advanced configuration validation and security features"
+version: "1.0.0"
+slug: sip_webrtc_client
+init: false
+arch:
+  - aarch64
+  - amd64
+  - armhf
+  - armv7
+ingress: true
+panel_icon: mdi:phone-dial
+panel_title: "SIP Video Client"
+startup: services
+hassio_api: true
+hassio_role: default
+homeassistant_api: true
+advanced: false
+stage: stable
+options:
+  sip_server: ""
+  sip_username: ""
+  sip_password: ""
+  sip_domain: ""
+  websocket_port: 8088
+  video_enabled: true
+  audio_enabled: true
+  auto_answer: false
+  ha_integration_enabled: true
+  entity_prefix: "sip_client"
+  stun_servers:
+    - "stun:stun.l.google.com:19302"
+    - "stun:stun1.l.google.com:19302"
+  turn_servers: []
+  codec_preferences:
+    video: ["H264", "VP8", "VP9"]
+    audio: ["OPUS", "G722", "PCMU"]
+  ui_theme: "auto"
+  call_timeout: 30
+  log_level: "info"
+schema:
+  sip_server: "str"
+  sip_username: "match(^[a-zA-Z0-9._-]{3,64}$)"
+  sip_password: "match(^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,128}$)"
+  sip_domain: "str?"
+  websocket_port: "port"
+  video_enabled: "bool"
+  audio_enabled: "bool"
+  auto_answer: "bool"
+  ha_integration_enabled: "bool"
+  entity_prefix: "match(^[a-z][a-z0-9_]{2,31}$)"
+  stun_servers: ["match(^stuns?://[a-zA-Z0-9.-]+(?::\\d{1,5})?$)"]
+  turn_servers: ["match(^turns?://[a-zA-Z0-9.-]+(?:\\d{1,5})?$)"]
+  codec_preferences:
+    video: ["list(H264|VP8|VP9|AV1)"]
+    audio: ["list(OPUS|G722|PCMU|PCMA|G729)"]
+  ui_theme: "list(auto|light|dark)"
+  call_timeout: "int(5,300)"
+  log_level: "list(error|warn|info|debug)"
+ports:
+  8088/tcp: 8088
+  10000-20000/udp: null
+ports_description:
+  8088/tcp: "WebSocket SIP signaling port"
+  10000-20000/udp: "RTP media ports for audio/video streams"
+environment:
+  - SIP_DEBUG=false
+map:
+  - share:rw
+  - addon_config
+backup: hot
+backup_exclude:
+  - "*.log"
+  - "tmp/*"
+  - ".cache/*"
+watchdog: "http://[HOST]:[PORT:8088]/health"
+image: "ghcr.io/homeassistant/amd64-addon-sipwebrtc"
+
