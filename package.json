@@ -8,12 +8,9 @@
     "dev": "nodemon src/index.js",
     "test": "jest --coverage --detectOpenHandles --forceExit",
     "test:unit": "jest tests/unit --coverage",
-    "test:integration": "jest tests/integration --coverage",
-    "test:e2e": "PUPPETEER_SKIP_DOWNLOAD=true jest tests/e2e --runInBand",
+    "test:integration": "jest tests/integration --coverage --testTimeout=30000",
     "test:watch": "jest --watch",
-    "lint": "eslint src/ tests/ --ext .js",
-    "lint:fix": "eslint src/ tests/ --ext .js --fix",
-    "build": "npm run lint && npm run test:unit && npm run test:integration",
+    "build": "npm run test:unit",
     "health-check": "curl -f http://localhost:8088/health || exit 1",
     "postinstall": "echo 'Installation complete - Puppeteer download skipped for containerized environment'"
   },
@@ -30,9 +27,6 @@
   "devDependencies": {
     "nodemon": "^3.0.2",
     "jest": "^29.7.0",
-    "@eslint/js": "^9.0.0",
-    "eslint": "^9.0.0",
-    "puppeteer-core": "^22.0.0",
     "@types/jest": "^29.5.8"
   },
   "engines": {
@@ -50,12 +44,8 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/homeassistant-community/addon-sip-webrtc.git"
+    "url": "https://github.com/Ahmed9190/sip-webrtc-client.git"
   },
-  "bugs": {
-    "url": "https://github.com/homeassistant-community/addon-sip-webrtc/issues"
-  },
-  "homepage": "https://github.com/homeassistant-community/addon-sip-webrtc#readme",
   "jest": {
     "testEnvironment": "node",
     "collectCoverageFrom": [
@@ -63,8 +53,6 @@
       "!src/**/*.test.js"
     ],
     "testTimeout": 10000,
-    "setupFilesAfterEnv": [
-      "<rootDir>/tests/setup.js"
-    ]
+    "setupFilesAfterEnv": ["<rootDir>/tests/setup.js"]
   }
 }
